@@ -11,7 +11,9 @@
     "@sap/cds-dk": "^10"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "prepush:cf": "node ./scripts/cf-buildpack-pre-push.mjs",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "private": true
 }

@@ -1,22 +1,35 @@
-# Getting Started
+# Testing the CF Pre-Push Buildpack Check
 
-Welcome to your new CAP project.
+## Prerequisites
 
-It contains these folders and files, following our recommended project layout:
+1. Install dependencies:
+   `npm install`
+2. Log in to Cloud Foundry:
+   `cf login`
+3. Make sure your local Node.js is available:
+   `node -v`
 
-File or Folder | Purpose
----------|----------
-`app/` | content for UI frontends goes here
-`db/` | your domain models and data go here
-`srv/` | your service models and code go here
-`readme.md` | this getting started guide
+## One-Time Hook Setup
 
-## Next Steps
+Run this once so Git uses the repository hook:
 
-- Open a new terminal and run `cds watch`
-- (in VS Code simply choose _**Terminal** > Run Task > cds watch_)
-- Start with your domain model, in a CDS file in `db/`
+`npm run prepare`
 
-## Learn More
+## Manual Test
 
-Learn more at <https://cap.cloud.sap>.
+Run the pre-push validation directly:
+
+`npm run prepush:cf`
+
+Expected behavior:
+
+- It checks whether you are logged in to CF.
+- It reads the `nodejs_buildpack` entry for `cflinuxfs4` from `cf buildpacks`.
+- It extracts the buildpack filename and version.
+- It compares that version with the matching GitHub release from `cloudfoundry/nodejs-buildpack`.
+- It runs `node -v` locally.
+- It warns if your local Node.js version is not listed as supported in that buildpack release.
+
+## Git Hook Test
+
+After `npm run prepare`, run a normal Git push. The pre-push hook will execute automatically before the push proceeds.
