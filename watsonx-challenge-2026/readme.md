@@ -1,15 +1,59 @@
 # CF Pre-Push Buildpack Check
 
-Blocks a `git push` when your local Node.js version is not supported by the
-`nodejs_buildpack` version installed in your target CF environment.  
+Automatically blocks `git push` when your local Node.js version is not
+supported by the `nodejs_buildpack` installed in your target CF environment.
+The check runs entirely inside `.githooks/pre-push` — no extra tooling needed.
+
 The only escape hatch is `git push --no-verify`.
 
 ---
 
-## Where the output appears
+## How to run
 
-The check runs **automatically** the moment you run `git push`.  
-Output is printed directly in the same terminal window where you typed the push command — you do not need to open anything else.
+### 1. Clone the repo
+
+```sh
+git clone <repo-url>
+cd watsonx-challenge-2026
+```
+
+### 2. Install dependencies (activates the hook automatically)
+
+```sh
+npm install
+```
+
+`npm install` triggers the `prepare` script which runs `git config core.hooksPath .githooks`.
+The pre-push hook is now active. You do **not** need to do anything else.
+
+Verify the hook is wired up:
+
+```sh
+git config core.hooksPath
+# expected output: .githooks
+```
+
+### 3. Log in to Cloud Foundry
+
+The hook calls `cf buildpacks`, so you must be logged in before pushing:
+
+```sh
+cf login
+```
+
+### 4. Push normally
+
+```sh
+git add .
+git commit -m "your message"
+git push
+```
+
+The hook fires automatically on `git push`. Output appears in the same terminal.
+
+---
+
+## What you will see in the terminal
 
 ### ✅ Push allowed — versions match
 
@@ -25,11 +69,11 @@ Output is printed directly in the same terminal window where you typed the push 
 [cf-pre-push] ✔  Node.js v20.19.2 is supported — push allowed.
 ```
 
-Git proceeds with the push immediately after the last line above.
-
----
+Git proceeds with the push immediately after.
 
 ### ⛔ Push blocked — version mismatch
+
+A native OS popup appears **and** the terminal prints:
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -45,83 +89,45 @@ Git proceeds with the push immediately after the last line above.
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
-Git aborts the push. Nothing is sent to the remote.
+Git aborts. Nothing is sent to the remote.
 
----
-
-## One-time setup
-
-Run this **once** after cloning so Git picks up the hook:
+To fix: switch to a supported Node version, then push again:
 
 ```sh
-npm install        # also runs `npm run prepare` which sets core.hooksPath
-```
-
-Or manually:
-
-```sh
-npm run prepare
-```
-
-This sets `core.hooksPath = .githooks` in your local git config.  
-Verify it worked:
-
-```sh
-git config core.hooksPath   # should print: .githooks
+nvm use 20        # or whichever version is listed as supported
+git push
 ```
 
 ---
 
 ## Prerequisites
 
-| Tool | Why |
-|------|-----|
-| `node` | Version is checked against the buildpack manifest |
-| `cf` CLI | Used to read the installed buildpack version |
-| `curl` | Used to fetch the raw `manifest.yml` from GitHub |
-
-Log in to CF before pushing:
-
-```sh
-cf login
-```
+| Tool | Purpose |
+|------|---------|
+| `node` | Runs the hook script; version is checked against the buildpack manifest |
+| `cf` CLI | Reads the installed buildpack and stack from your CF target |
+| `curl` | Fetches the raw `manifest.yml` from GitHub |
 
 ---
 
 ## How it works
 
-1. Runs `cf target` to confirm you are logged in.
-2. Runs `cf buildpacks` and finds the `nodejs_buildpack` row for stack `cflinuxfs4`.
+1. `cf target` — confirms you are logged in to CF.
+2. `cf buildpacks` — finds the `nodejs_buildpack` row for stack `cflinuxfs4`.
 3. Extracts the buildpack version from the `.zip` filename (e.g. `v1.8.22`).
-4. Fetches the raw `manifest.yml` directly from GitHub:
+4. Fetches the raw manifest directly from GitHub:
    ```
-   https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack/<version>/manifest.yml
+   https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack/v1.8.22/manifest.yml
    ```
-5. Parses every `node` dependency entry whose `cf_stacks` list includes `cflinuxfs4`.
-6. Compares the collected versions against `node -v`.
-7. **Fails with exit code 1** (blocks the push) if your local version is not in the list.
-
----
-
-## Manual run
-
-You can run the check at any time without pushing:
-
-```sh
-node scripts/cf-buildpack-pre-push.mjs
-```
-
-or via npm:
-
-```sh
-npm run prepush:cf 
-```
+5. Parses every `node` dependency block whose `cf_stacks` includes `cflinuxfs4`.
+6. Compares the list against your local `node -v`.
+7. **Blocks the push (exit 1) + shows a popup** if your version is not supported.
 
 ---
 
 ## Bypassing the check
 
-Only do this in emergencies:
+Only in emergencies — this skips the hook entirely:
 
 ```sh
 git push --no-verify
