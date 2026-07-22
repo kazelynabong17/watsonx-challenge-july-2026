@@ -9,7 +9,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 node - <<'EOF'
-import { execFileSync, spawnSync } from 'node:child_process';
+const { execFileSync, spawnSync } = require('node:child_process');
 
 const REQUIRED_STACK     = 'cflinuxfs4';
 const REQUIRED_BUILDPACK = 'nodejs_buildpack';
