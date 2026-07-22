@@ -114,7 +114,7 @@ node scripts/cf-buildpack-pre-push.mjs
 or via npm:
 
 ```sh
-npm run prepush:cf
+npm run prepush:cf 
 ```
 
 ---
