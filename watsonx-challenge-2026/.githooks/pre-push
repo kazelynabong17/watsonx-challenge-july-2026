@@ -5,8 +5,11 @@
 # Verifies that your local Node.js version is supported by the nodejs_buildpack
 # version currently installed in the target CF environment.
 #
-# To bypass this check (NOT recommended — only for emergencies):
-#   git push --no-verify
+# The only escape hatch is:  git push --no-verify
 # ─────────────────────────────────────────────────────────────────────────────
 
-npm run prepush:cf
+# Run the check directly via node so the exit code is never swallowed by npm.
+node "$(git rev-parse --show-toplevel)/scripts/cf-buildpack-pre-push.mjs"
+
+# Explicitly forward the exit code to git — a non-zero value aborts the push.
+exit $?
