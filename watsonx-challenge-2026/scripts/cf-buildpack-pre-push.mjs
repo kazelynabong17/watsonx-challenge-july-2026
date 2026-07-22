@@ -219,16 +219,17 @@ function main() {
   console.log(`[cf-pre-push] Supported Node.js    : ${supportedNodeVersions.join(', ')}`);
   console.log(`[cf-pre-push] Local Node.js        : ${localNodeVersion}`);
 
-  // 6. Version check
+  // 6. Version check — hard block if local Node is not in the supported list
   if (!supportedNodeVersions.includes(localNodeVersion)) {
-    warn(
-      `Local Node.js v${localNodeVersion} is NOT listed as supported by ` +
+    fail(
+      `Local Node.js v${localNodeVersion} is NOT supported by\n` +
       `${REQUIRED_BUILDPACK} ${buildpack.version} on ${REQUIRED_STACK}.\n` +
-      `          Supported versions: ${supportedNodeVersions.join(', ')}`,
+      `Supported versions: ${supportedNodeVersions.join(', ')}\n` +
+      `Switch Node version (e.g. nvm use <version>) and try again.`,
     );
-  } else {
-    console.log(`[cf-pre-push] ✔  Node.js v${localNodeVersion} is supported — push allowed.`);
   }
+
+  console.log(`[cf-pre-push] ✔  Node.js v${localNodeVersion} is supported — push allowed.`);
 }
 
 main();
