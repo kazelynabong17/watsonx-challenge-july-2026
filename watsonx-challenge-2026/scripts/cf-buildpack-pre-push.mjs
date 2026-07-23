@@ -1,14 +1,39 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const REQUIRED_STACK      = 'cflinuxfs4';
-const REQUIRED_BUILDPACK  = 'nodejs_buildpack';
+// ─── load .env (no external deps — plain key=value parser) ───────────────────
+
+function loadEnv() {
+  const dir = dirname(fileURLToPath(import.meta.url));
+  // Look for .env in the project root (one level up from scripts/)
+  const envPath = resolve(dir, '..', '.env');
+  try {
+    return Object.fromEntries(
+      readFileSync(envPath, 'utf8')
+        .split(/\r?\n/)
+        .filter((l) => l.trim() && !l.startsWith('#'))
+        .map((l) => l.split('=').map((p) => p.trim()))
+        .filter(([k]) => k),
+    );
+  } catch {
+    return {}; // .env is optional — fall back to defaults below
+  }
+}
+
+const env = loadEnv();
+
+// Constants — override via .env (see .env.example)
+const REQUIRED_STACK     = env.CF_REQUIRED_STACK     ?? 'cflinuxfs4';
+const REQUIRED_BUILDPACK = env.CF_REQUIRED_BUILDPACK ?? 'nodejs_buildpack';
 
 // Raw manifest.yml from the cloudfoundry/nodejs-buildpack GitHub repo.
 // The version tag is resolved at runtime from 'cf buildpacks'.
 // e.g. https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack/v1.8.22/manifest.yml
 const RAW_MANIFEST_BASE =
-  'https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack';
+  env.CF_RAW_MANIFEST_BASE ?? 'https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 

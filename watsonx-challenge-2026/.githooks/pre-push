@@ -10,10 +10,33 @@
 
 node - <<'EOF'
 const { execFileSync, spawnSync } = require('node:child_process');
+const { readFileSync } = require('node:fs');
+const { resolve } = require('node:path');
 
-const REQUIRED_STACK     = 'cflinuxfs4';
-const REQUIRED_BUILDPACK = 'nodejs_buildpack';
-const RAW_MANIFEST_BASE  = 'https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack';
+// ─── load .env (no external deps — plain key=value parser) ──────────────────
+
+function loadEnv() {
+  // __dirname is not available in a heredoc; use process.env.PWD or cwd
+  const envPath = resolve(process.cwd(), '.env');
+  try {
+    return Object.fromEntries(
+      readFileSync(envPath, 'utf8')
+        .split(/\r?\n/)
+        .filter((l) => l.trim() && !l.startsWith('#'))
+        .map((l) => l.split('=').map((p) => p.trim()))
+        .filter(([k]) => k),
+    );
+  } catch {
+    return {}; // .env is optional — fall back to defaults below
+  }
+}
+
+const _env = loadEnv();
+
+// Constants — override via .env (see .env.example)
+const REQUIRED_STACK     = _env.CF_REQUIRED_STACK     || 'cflinuxfs4';
+const REQUIRED_BUILDPACK = _env.CF_REQUIRED_BUILDPACK || 'nodejs_buildpack';
+const RAW_MANIFEST_BASE  = _env.CF_RAW_MANIFEST_BASE  || 'https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack';
 
 // ─── helpers ──────────────────────────────────────────────────────────────
 
