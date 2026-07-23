@@ -146,18 +146,21 @@ function parseNodeVersionsFromManifest(yaml, stack) {
     // Only process node dependency blocks
     if (!block.match(/^\s*node\s*$/m)) continue;
 
-    // Check if this block covers the required stack
-    const stacksSection = block.match(/cf_stacks:([\s\S]*?)(?=\n\w|\n- |\nurl:|\Z)/);
-    if (!stacksSection) continue;
+    // Collect cf_stacks list items line-by-line (regex lookahead was unreliable
+    // across manifest format versions where \Z is not valid JS).
+    const cfStacksIdx = block.indexOf('cf_stacks:');
+    if (cfStacksIdx === -1) continue;
 
-    const stackList = stacksSection[1]
-      .split('\n')
-      .map((l) => l.replace(/^\s*-\s*/, '').trim())
-      .filter(Boolean);
+    const stackList = [];
+    for (const line of block.slice(cfStacksIdx + 'cf_stacks:'.length).split('\n')) {
+      const item = line.match(/^\s+-\s+(\S+)/);
+      if (item) { stackList.push(item[1]); continue; }
+      if (line.match(/^\s+\S/) && stackList.length > 0) break; // non-list key ends section
+    }
 
     if (!stackList.includes(stack)) continue;
 
-    // Extract version value
+    // Only exact semver x.y.z (skip wildcard "22.x" default_versions entries)
     const verMatch = block.match(/version:\s*["']?(\d+\.\d+\.\d+)["']?/);
     if (verMatch) {
       versions.push(verMatch[1]);
