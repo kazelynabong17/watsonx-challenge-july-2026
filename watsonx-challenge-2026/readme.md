@@ -136,3 +136,5 @@ git push --no-verify
 # test
 
 <!-- test: trigger pre-push block -->
+
+<!-- test: pre-push block attempt 2 -->
