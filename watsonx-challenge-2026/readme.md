@@ -103,7 +103,7 @@ git push
 ## Prerequisites
 
 | Tool | Purpose |
-|------|---------|
+|------|---------| 
 | `node` | Runs the hook script; version is checked against the buildpack manifest |
 | `cf` CLI | Reads the installed buildpack and stack from your CF target |
 | `curl` | Fetches the raw `manifest.yml` from GitHub |
