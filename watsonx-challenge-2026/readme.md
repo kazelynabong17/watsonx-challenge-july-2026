@@ -89,7 +89,7 @@ A native OS popup appears **and** the terminal prints:
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
-Git aborts. Nothing is sent to the remote.
+Git aborts. Nothing is sent to the remote. 
 
 To fix: switch to a supported Node version, then push again:
  
