@@ -92,7 +92,7 @@ A native OS popup appears **and** the terminal prints:
 Git aborts. Nothing is sent to the remote.
 
 To fix: switch to a supported Node version, then push again:
-
+ 
 ```sh
 nvm use 20        # or whichever version is listed as supported
 git push
