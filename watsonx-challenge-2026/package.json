@@ -12,7 +12,6 @@
   },
   "scripts": {
     "start": "cds-serve",
-    "prepush:cf": "node ./scripts/cf-buildpack-pre-push.mjs",
     "prepare": "git config core.hooksPath .githooks"
   },
   "private": true
