@@ -69,7 +69,7 @@ The hook fires automatically on `git push`. Output appears in the same terminal.
 [cf-pre-push] ✔  Node.js v20.19.2 is supported — push allowed. 
 ```
 
-Git proceeds with the push immediately after.
+Git proceeds with the push immediately after. 
 
 ### ⛔ Push blocked — version mismatch 
 
