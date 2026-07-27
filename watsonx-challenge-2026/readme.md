@@ -66,7 +66,7 @@ The hook fires automatically on `git push`. Output appears in the same terminal.
 [cf-pre-push] Manifest URL         : https://raw.githubusercontent.com/cloudfoundry/nodejs-buildpack/v1.8.22/manifest.yml
 [cf-pre-push] Supported Node.js    : 20.19.2, 18.20.8
 [cf-pre-push] Local Node.js        : 20.19.2
-[cf-pre-push] ✔  Node.js v20.19.2 is supported — push allowed.
+[cf-pre-push] ✔  Node.js v20.19.2 is supported — push allowed. 
 ```
 
 Git proceeds with the push immediately after.
