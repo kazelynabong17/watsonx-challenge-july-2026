@@ -71,7 +71,7 @@ The hook fires automatically on `git push`. Output appears in the same terminal.
 
 Git proceeds with the push immediately after.
 
-### ⛔ Push blocked — version mismatch
+### ⛔ Push blocked — version mismatch 
 
 A native OS popup appears **and** the terminal prints:
 
